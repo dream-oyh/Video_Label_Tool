@@ -75,7 +75,7 @@ class MyFrame(tk.CTkFrame):
         self.playtime.set(3)
         self.playtime_enter = tk.CTkEntry(
             master=self,
-            width=10,
+            width=40,
             textvariable=self.playtime,
         )
         self.playtime_enter.place(x=80, y=580)

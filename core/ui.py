@@ -4,13 +4,16 @@ from component.InfoFrame import InfoFrame
 
 # from component.InfoFrame import InfoFrame
 from component.OptionGroup import OptionGroup
-from core.Video import play_video, save_video
-from utils import next_segment, open_video, prev_segment
+from utils import OPTION
+
+from .logic import next_segment, open_video, prev_segment
+from .Video import play_video, save_video
 
 
 class MyFrame(tk.CTkFrame):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
         # 打开文件按钮
         self.file_open_button = tk.CTkButton(
             master=self,
@@ -18,20 +21,18 @@ class MyFrame(tk.CTkFrame):
             command=lambda: open_video(app=self.master),
         )
         self.file_open_button.place(x=0, y=0)
-        # 标签选项设置
-        self.option = ["Anger", "Happy", "Sad", "Anxious"]
+
         # 显示打开文件路径，确保文件正确读取
         self.video_path_label = tk.CTkLabel(
             master=self, text="", width=1000, height=1, anchor="w"
         )
         self.video_path_label.place(x=170, y=8)
+
         # 视频显示界面
-        self.video_frames = tk.CTkLabel(
-            master=self, text="", width=750, height=450
-        )  # , width=540, height=360
+        self.video_frames = tk.CTkLabel(master=self, text="", width=750, height=450)
         self.video_frames.place(x=0, y=50, anchor="nw")
 
-        # 加载上一个视频片段
+        # 加载上一个视频片段按钮
         self.load_button_prev = tk.CTkButton(
             master=self,
             text="Load prev",
@@ -40,7 +41,7 @@ class MyFrame(tk.CTkFrame):
         )
         self.load_button_prev.place(x=200, y=550)
 
-        # 加载下一个视频片段
+        # 加载下一个视频片段按钮
         self.load_button_next = tk.CTkButton(
             master=self,
             text="Load next",
@@ -49,7 +50,7 @@ class MyFrame(tk.CTkFrame):
         )
         self.load_button_next.place(x=350, y=550)
 
-        # 重新播放视频片段
+        # 重新播放视频片段按钮
         self.reload_button = tk.CTkButton(
             master=self,
             text="Reload",
@@ -81,7 +82,7 @@ class MyFrame(tk.CTkFrame):
 
         # 标签选项设置
 
-        self.label_option = OptionGroup(master=self, option=self.option)
+        self.label_option = OptionGroup(master=self, option=OPTION)
         self.label_option.place(x=800, y=100)
 
         self.video_info = InfoFrame(master=self)
@@ -89,7 +90,10 @@ class MyFrame(tk.CTkFrame):
 
     def update_button_status(self, app):
         if getattr(app, "video", None):
-            self.load_button_next.configure(state="normal")
-            self.load_button_prev.configure(state="normal")
-            self.reload_button.configure(state="normal")
-            self.save_button.configure(state="normal")
+            for i in (
+                self.load_button_next,
+                self.load_button_prev,
+                self.reload_button,
+                self.save_button,
+            ):
+                i.configure(state="normal")

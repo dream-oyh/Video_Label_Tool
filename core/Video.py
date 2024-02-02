@@ -4,8 +4,13 @@ import customtkinter as tk
 import cv2
 from PIL import Image
 
+from utils import OPTION
 
-def video_init(app):
+output_path = Path("output")
+output_path.mkdir(exist_ok=True)
+
+
+def video_info(app):
     video: cv2.VideoCapture = app.video
     play_time = app.set_play_time
     video.set(cv2.CAP_PROP_POS_FRAMES, round(app.current_frame))
@@ -16,7 +21,7 @@ def video_init(app):
 
 
 def play_video(app):
-    video, play_count, width, height = video_init(app)
+    video, play_count, _, _ = video_info(app)
     video_frames: tk.CTkLabel = app.frame.video_frames
     while (
         video.isOpened()
@@ -31,9 +36,7 @@ def read_frame(video: cv2.VideoCapture, video_frames: tk.CTkLabel) -> bool:
     if not ret or readyframe is None:
         return False
     frame = cv2.cvtColor(readyframe, cv2.COLOR_BGR2RGBA)  # 转至 RGB 色彩空间
-    image = tk.CTkImage(
-        Image.fromarray(frame), size=(720, 480)
-    )
+    image = tk.CTkImage(Image.fromarray(frame), size=(720, 480))
     video_frames.configure(image=image)
     video_frames.image = image
     video_frames.update()
@@ -41,47 +44,19 @@ def read_frame(video: cv2.VideoCapture, video_frames: tk.CTkLabel) -> bool:
 
 
 def save_video(app):
-    option_num = app.frame.label_option.num.get()
-    match option_num:
-        case 0:
-            write_video(
-                app,
-                "label_folder/Anger/"
-                + "Anger"
-                + str(len(list(Path("label_folder/Anger/").glob("*.avi"))) + 1)
-                + ".avi",
-            )
-        case 1:
-            write_video(
-                app,
-                "label_folder/Happy/"
-                + "Happy"
-                + str(len(list(Path("label_folder/Happy/").glob("*.avi"))) + 1)
-                + ".avi",
-            )
-        case 2:
-            write_video(
-                app,
-                "label_folder/Sad/"
-                + "Sad"
-                + str(len(list(Path("label_folder/Sad/").glob("*.avi"))) + 1)
-                + ".avi",
-            )
-        case 3:
-            write_video(
-                app,
-                "label_folder/Anxious/"
-                + "Anxious"
-                + str(len(list(Path("label_folder/Anxious/").glob("*.avi"))) + 1)
-                + ".avi",
-            )
+    option_num: int = app.frame.label_option.num.get()
+    emotion = OPTION[option_num]
+    output_path_sub = output_path / emotion
+    output_path_sub.mkdir(exist_ok=True)
+    video_index: int = len(list(output_path_sub.glob("*.avi"))) + 1
+    write_video(app, output_path_sub / ".".join((emotion, str(video_index), "avi")))
 
 
-def write_video(app, path: str):
-    video, play_count, width, height = video_init(app)
+def write_video(app, path: Path):
+    video, play_count, width, height = video_info(app)
     fourcc = cv2.VideoWriter_fourcc(*"XVID")
 
-    out = cv2.VideoWriter(path, fourcc, 20.0, (width, height))
+    out = cv2.VideoWriter(str(path.absolute()), fourcc, app.fps, (width, height))
 
     while (
         video.isOpened()

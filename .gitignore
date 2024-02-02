@@ -4,3 +4,4 @@ example.*
 ~$*
 __pycache__
 *.mp4
+/output

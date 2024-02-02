@@ -17,3 +17,4 @@ finally:
         t.release()
     cv2.destroyAllWindows()
     logging.info("程序结束")
+    exit(0)

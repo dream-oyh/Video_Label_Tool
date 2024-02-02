@@ -6,9 +6,6 @@ from component.InfoFrame import InfoFrame
 from component.OptionGroup import OptionGroup
 from utils import OPTION
 
-from .logic import next_segment, open_video, prev_segment
-from .Video import play_video, save_video
-
 
 class MyFrame(tk.CTkFrame):
     def __init__(self, **kwargs):
@@ -16,9 +13,7 @@ class MyFrame(tk.CTkFrame):
 
         # 打开文件按钮
         self.file_open_button = tk.CTkButton(
-            master=self,
-            text="打开文件",
-            command=lambda: open_video(app=self.master),
+            master=self, text="打开文件", command=self.master.open_video
         )
         self.file_open_button.place(x=0, y=0)
 
@@ -36,7 +31,7 @@ class MyFrame(tk.CTkFrame):
         self.load_button_prev = tk.CTkButton(
             master=self,
             text="Load prev",
-            command=lambda: prev_segment(app=self.master),
+            command=self.master.step_backward,
             state="disabled",
         )
         self.load_button_prev.place(x=200, y=550)
@@ -45,7 +40,7 @@ class MyFrame(tk.CTkFrame):
         self.load_button_next = tk.CTkButton(
             master=self,
             text="Load next",
-            command=lambda: next_segment(app=self.master),
+            command=self.master.step_forward,
             state="disabled",
         )
         self.load_button_next.place(x=350, y=550)
@@ -54,7 +49,7 @@ class MyFrame(tk.CTkFrame):
         self.reload_button = tk.CTkButton(
             master=self,
             text="Reload",
-            command=lambda: play_video(app=self.master),
+            command=self.master.play_video,
             state="disabled",
         )
         self.reload_button.place(x=500, y=550)
@@ -63,7 +58,7 @@ class MyFrame(tk.CTkFrame):
         self.save_button = tk.CTkButton(
             master=self,
             text="Save",
-            command=lambda: save_video(app=self.master),
+            command=self.master.save_segment,
             state="disabled",
         )
         self.save_button.place(x=650, y=550)

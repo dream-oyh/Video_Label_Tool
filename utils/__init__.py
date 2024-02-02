@@ -9,6 +9,7 @@ def open_video(app):
     logging.info("Opening video file: " + file_path)
     app.frame.video_path_label.configure(text=file_path)
     app.open_video(file_path)
+    app.frame.update_button_status(app)
     play_video(app)
 
 
@@ -20,12 +21,3 @@ def next_segment(app):
 def prev_segment(app):
     app.step_backward()
     play_video(app)
-
-    # match option_val:
-    #     case 1:
-    #         Path("./label_folder/"+option[0]).mkdir(parents=True, exist_ok=True)
-    #     case 2:
-    #         Path("./label_folder/"+option[1]).mkdir(parents=True, exist_ok=True)
-    #     case 3:
-    #         Path("./label_folder/"+option[2]).mkdir(parents=True, exist_ok=True)
-    #     case 4:

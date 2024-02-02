@@ -36,6 +36,7 @@ class MyFrame(tk.CTkFrame):
             master=self,
             text="Load prev",
             command=lambda: prev_segment(app=self.master),
+            state="disabled",
         )
         self.load_button_prev.place(x=200, y=550)
 
@@ -44,6 +45,7 @@ class MyFrame(tk.CTkFrame):
             master=self,
             text="Load next",
             command=lambda: next_segment(app=self.master),
+            state="disabled",
         )
         self.load_button_next.place(x=350, y=550)
 
@@ -52,8 +54,18 @@ class MyFrame(tk.CTkFrame):
             master=self,
             text="Reload",
             command=lambda: play_video(app=self.master),
+            state="disabled",
         )
         self.reload_button.place(x=500, y=550)
+
+        # 保存按钮
+        self.save_button = tk.CTkButton(
+            master=self,
+            text="Save",
+            command=lambda: save_video(app=self.master),
+            state="disabled",
+        )
+        self.save_button.place(x=650, y=550)
 
         # playtime 调整
         self.playtime_label = tk.CTkLabel(text="间隔步长/s:", master=self)
@@ -72,17 +84,12 @@ class MyFrame(tk.CTkFrame):
         self.label_option = OptionGroup(master=self, option=self.option)
         self.label_option.place(x=800, y=100)
 
-        # 保存按钮
-        # self.save_button = tk.Button(
-        #     master=self, text="Save", command=lambda: save_label(app=self.master)
-        # )
-        self.save_button = tk.CTkButton(
-            master=self,
-            text="Save",
-            command=lambda: save_video(app=self.master),
-        )
-        self.save_button.place(x=650, y=550)
         self.video_info = InfoFrame(master=self)
         self.video_info.place(x=800, y=200, anchor="nw")
-        
 
+    def update_button_status(self, app):
+        if getattr(app, "video", None):
+            self.load_button_next.configure(state="normal")
+            self.load_button_prev.configure(state="normal")
+            self.reload_button.configure(state="normal")
+            self.save_button.configure(state="normal")

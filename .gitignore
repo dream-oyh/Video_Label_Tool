@@ -1,0 +1,5 @@
+test*.*
+temp*.*
+example.*
+~$*
+__pycache__

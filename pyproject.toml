@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "video-label-tool"
+version = "0.1.0"
+description = ""
+authors = ["dream同学0 <10135984+o19859860010@user.noreply.gitee.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+customtkinter = "^5.2.2"
+opencv-python = "^4.9.0.80"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

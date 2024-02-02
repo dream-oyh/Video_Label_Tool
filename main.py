@@ -1,5 +1,6 @@
 import logging
 import tkinter as tk
+from pathlib import Path
 
 import cv2
 
@@ -15,6 +16,7 @@ class APP(tk.Tk):
         self.frame.grid(row=1, column=1)
         self.video: cv2.VideoCapture  # 视频
         self.current_frame = 0  # 当前帧
+        self.folder_build()
 
     @property
     def fps(self) -> float:
@@ -66,6 +68,11 @@ class APP(tk.Tk):
         logging.info(
             f"当前帧：{self.current_frame}，当前时间：{self.current_frame / self.fps}"
         )
+
+    def folder_build(self):
+        option_val = self.frame.option
+        for i in option_val:
+            Path("./label_folder/" + i).mkdir(parents=True, exist_ok=True)
 
 
 app = APP()

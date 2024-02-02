@@ -1,6 +1,8 @@
 import tkinter as tk
 
-from core.PlayVideo import play_video
+# from component.InfoFrame import InfoFrame
+from component.OptionGroup import OptionGroup
+from core.Video import play_video, save_video
 from utils import next_segment, open_video, prev_segment
 
 
@@ -14,6 +16,8 @@ class MyFrame(tk.Frame):
             command=lambda: open_video(app=self.master),
         )
         self.file_open_button.place(x=0, y=0)
+        # 标签选项设置
+        self.option = ["Anger", "Happy", "Sad", "Anxious"]
         # 显示打开文件路径，确保文件正确读取
         self.video_path_label = tk.Label(
             master=self, text="", width=1000, height=1, anchor="w"
@@ -60,3 +64,24 @@ class MyFrame(tk.Frame):
             textvariable=self.playtime,
         )
         self.playtime_enter.place(x=80, y=480)
+
+        # 标签选项设置
+
+        self.label_option = OptionGroup(option=self.option)
+        self.label_option.place(x=650, y=100)
+
+        # 保存按钮
+        # self.save_button = tk.Button(
+        #     master=self, text="Save", command=lambda: save_label(app=self.master)
+        # )
+        self.save_button = tk.Button(
+            master=self,
+            text="Save",
+            command=lambda: save_video(app=self.master),
+        )
+        self.save_button.place(x=650, y=450)
+
+    # def view_info(self):
+    #     # 显示导入视频信息
+    #     self.video_info = InfoFrame(master=self)
+    #     self.video_info.place(x=0, y=0)

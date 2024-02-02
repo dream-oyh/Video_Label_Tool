@@ -1,38 +1,42 @@
-import tkinter as tk
+import customtkinter as tk
 
 
-class SubInfo(tk.Frame):
-    def __init__(self, text, val, **kwargs):
-        super().__init__(**kwargs)
-        self.text_label = tk.Label(text=text)
-        self.text_label.pack(side='left', anchor='nw')
-        self.val = tk.Label(text=str(val))
-        self.val.pack(side='left', anchor='nw')
+class SubInfo(tk.CTkFrame):
+    def __init__(self, text, val, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.text_label = tk.CTkLabel(master=self, text=text)
+        self.text_label.grid(row=1, column=1)
+        self.val = tk.CTkLabel(master=self, text=str(val))
+        self.val.grid(row=1, column=2)
 
 
-class InfoFrame(tk.Frame):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.totaltime_label = SubInfo(
-            text="视频总时长：", val=self.master.master.get_total_time
-        )
-        self.totaltime_label.pack()
+class InfoFrame(tk.CTkFrame):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
 
-        self.fps_label = SubInfo(text="视频帧率：", val=self.master.master.fps)
-        self.fps_label.pack()
+        self.totaltime_label = SubInfo(master=self, text="视频总时长：", val=0)
+        self.totaltime_label.grid(row=1, column=1, sticky="w")
 
-        self.frame_count_label = SubInfo(
-            text="视频总帧数：", val=self.master.master.frame_count
-        )
-        self.frame_count_label.pack()
+        self.fps_label = SubInfo(master=self, text="视频帧率：", val=0)
+        self.fps_label.grid(row=2, column=1, sticky="w")
 
-        self.current_frame_label = SubInfo(
-            text="当前帧数：", val=self.master.master.current_frame
-        )
-        self.current_frame_label.pack()
+        self.frame_count_label = SubInfo(master=self, text="视频总帧数：", val=0)
+        self.frame_count_label.grid(row=3, column=1, sticky="w")
+
+        self.current_frame_label = SubInfo(master=self, text="当前帧数：", val=0)
+        self.current_frame_label.grid(row=4, column=1, sticky="w")
 
         self.current_time_label = SubInfo(
+            master=self,
             text="当前时间：",
-            val=self.master.master.current_frame / self.master.master.fps,
+            val=0,
         )
-        self.current_time_label.pack()
+        self.current_time_label.grid(row=5, column=1, sticky="w")
+
+    def update_info(self):
+        app = self.master.master
+        self.totaltime_label.val.configure(text=str(app.get_total_time))
+        self.fps_label.val.configure(text=str(app.fps))
+        self.frame_count_label.val.configure(text=str(app.frame_count))
+        self.current_frame_label.val.configure(text=str(app.current_frame))
+        self.current_time_label.val.configure(text=str(app.current_frame / app.fps))

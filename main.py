@@ -1,7 +1,7 @@
 import logging
-import tkinter as tk
 from pathlib import Path
 
+import customtkinter as tk
 import cv2
 
 from core.ui import MyFrame
@@ -9,7 +9,7 @@ from core.ui import MyFrame
 logging.basicConfig(level=logging.DEBUG)
 
 
-class APP(tk.Tk):
+class APP(tk.CTk):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.frame = MyFrame(master=self, width=1080, height=720)
@@ -51,11 +51,13 @@ class APP(tk.Tk):
         logging.debug(
             f"视频帧率：{self.fps}，视频总帧数：{self.frame_count}，视频总时间：{self.get_total_time}"
         )
+        self.frame.video_info.update_info()
 
     def step_forward(self):
         temp = self.set_play_time * self.fps
         if self.current_frame + temp <= self.frame_count:
             self.current_frame += temp
+        self.frame.video_info.update_info()
         logging.info(
             f"当前帧：{self.current_frame}，当前时间：{self.current_frame / self.fps}"
         )
@@ -65,6 +67,7 @@ class APP(tk.Tk):
         temp = self.set_play_time * self.fps
         if self.current_frame - temp >= 0:
             self.current_frame -= temp
+        self.frame.video_info.update_info()
         logging.info(
             f"当前帧：{self.current_frame}，当前时间：{self.current_frame / self.fps}"
         )

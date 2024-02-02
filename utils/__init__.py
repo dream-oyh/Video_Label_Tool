@@ -9,9 +9,7 @@ def open_video(app):
     logging.info("Opening video file: " + file_path)
     app.frame.video_path_label.configure(text=file_path)
     app.open_video(file_path)
-
     play_video(app)
-    # app.frame.view_info()
 
 
 def next_segment(app):

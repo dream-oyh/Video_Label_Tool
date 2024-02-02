@@ -1,8 +1,8 @@
-import tkinter as tk
 from pathlib import Path
 
+import customtkinter as tk
 import cv2
-from PIL import Image, ImageTk
+from PIL import Image
 
 
 def video_init(app):
@@ -10,12 +10,14 @@ def video_init(app):
     play_time = app.set_play_time
     video.set(cv2.CAP_PROP_POS_FRAMES, round(app.current_frame))
     play_count = play_time * app.fps  # 3 秒内的视频总帧数
-    return video, play_count
+    width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    return video, play_count, width, height
 
 
 def play_video(app):
-    video, play_count = video_init(app)
-    video_frames: tk.Label = app.frame.video_frames
+    video, play_count, width, height = video_init(app)
+    video_frames: tk.CTkLabel = app.frame.video_frames
     while (
         video.isOpened()
         and video.get(cv2.CAP_PROP_POS_FRAMES) <= app.current_frame + play_count
@@ -24,12 +26,14 @@ def play_video(app):
             return
 
 
-def read_frame(video: cv2.VideoCapture, video_frames: tk.Label) -> bool:
+def read_frame(video: cv2.VideoCapture, video_frames: tk.CTkLabel) -> bool:
     ret, readyframe = video.read()
     if not ret or readyframe is None:
         return False
     frame = cv2.cvtColor(readyframe, cv2.COLOR_BGR2RGBA)  # 转至 RGB 色彩空间
-    image = ImageTk.PhotoImage(Image.fromarray(frame).resize((540, 360)))
+    image = tk.CTkImage(
+        Image.fromarray(frame), size=(720, 480)
+    )
     video_frames.configure(image=image)
     video_frames.image = image
     video_frames.update()
@@ -74,10 +78,8 @@ def save_video(app):
 
 
 def write_video(app, path: str):
-    video, play_count = video_init(app)
+    video, play_count, width, height = video_init(app)
     fourcc = cv2.VideoWriter_fourcc(*"XVID")
-    width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     out = cv2.VideoWriter(path, fourcc, 20.0, (width, height))
 
@@ -90,7 +92,3 @@ def write_video(app, path: str):
             break
         else:
             out.write(frame)
-
-def view_video_info(app):
-    video = app.video
-    

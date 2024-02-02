@@ -3,3 +3,4 @@ temp*.*
 example.*
 ~$*
 __pycache__
+*.mp4

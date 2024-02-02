@@ -1,7 +1,7 @@
 import logging
 from tkinter import filedialog
 
-from core.PlayVideo import play_video, read_frame
+from core.PlayVideo import play_video
 
 
 def open_video(app):
@@ -9,7 +9,7 @@ def open_video(app):
     logging.info("Opening video file: " + file_path)
     app.frame.video_path_label.configure(text=file_path)
     app.open_video(file_path)
-    read_frame(app.video, app.frame.video_frames)
+    play_video(app)
 
 
 def next_segment(app):

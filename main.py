@@ -14,7 +14,6 @@ class APP(tk.Tk):
         self.frame = MyFrame(master=self, width=1080, height=720)
         self.frame.grid(row=1, column=1)
         self.video: cv2.VideoCapture  # 视频
-        self.step_time: float = 3  # 步长（时间）
         self.current_frame = 0  # 当前帧
 
     @property
@@ -38,6 +37,13 @@ class APP(tk.Tk):
         """
         return self.frame_count / self.fps
 
+    @property
+    def set_play_time(self) -> int:
+        """
+        设置播放步长
+        """
+        return self.frame.playtime.get()
+
     def open_video(self, path: str):
         self.video = cv2.VideoCapture(path)
         logging.debug(
@@ -45,7 +51,7 @@ class APP(tk.Tk):
         )
 
     def step_forward(self):
-        temp = self.step_time * self.fps
+        temp = self.set_play_time * self.fps
         if self.current_frame + temp <= self.frame_count:
             self.current_frame += temp
         logging.info(
@@ -54,7 +60,7 @@ class APP(tk.Tk):
         logging.debug(f"temp: {temp}")
 
     def step_backward(self):
-        temp = self.step_time * self.fps
+        temp = self.set_play_time * self.fps
         if self.current_frame - temp >= 0:
             self.current_frame -= temp
         logging.info(

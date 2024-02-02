@@ -31,7 +31,7 @@ class MyFrame(tk.Frame):
             text="Load prev",
             command=lambda: prev_segment(app=self.master),
         )
-        self.load_button_prev.place(x=150, y=450)
+        self.load_button_prev.place(x=200, y=450)
 
         # 加载下一个视频片段
         self.load_button_next = tk.Button(
@@ -39,7 +39,7 @@ class MyFrame(tk.Frame):
             text="Load next",
             command=lambda: next_segment(app=self.master),
         )
-        self.load_button_next.place(x=300, y=450)
+        self.load_button_next.place(x=350, y=450)
 
         # 重新播放视频片段
         self.reload_button = tk.Button(
@@ -47,4 +47,16 @@ class MyFrame(tk.Frame):
             text="Reload",
             command=lambda: play_video(app=self.master),
         )
-        self.reload_button.place(x=450, y=450)
+        self.reload_button.place(x=500, y=450)
+
+        # playtime 调整
+        self.playtime_label = tk.Label(text="间隔步长/s:", master=self)
+        self.playtime_label.place(x=80, y=450)
+        self.playtime = tk.DoubleVar()
+        self.playtime.set(3)
+        self.playtime_enter = tk.Entry(
+            master=self,
+            width=10,
+            textvariable=self.playtime,
+        )
+        self.playtime_enter.place(x=80, y=480)

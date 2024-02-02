@@ -4,7 +4,7 @@ import cv2
 from PIL import Image, ImageTk
 
 
-def play_video(app, play_time=3):
+def play_video(app):
     """
     video: 视频
     video_frames: 视频播放 Label 控件
@@ -13,6 +13,7 @@ def play_video(app, play_time=3):
 
     video: cv2.VideoCapture = app.video
     video_frames: tk.Label = app.frame.video_frames
+    play_time = app.set_play_time
     video.set(cv2.CAP_PROP_POS_FRAMES, round(app.current_frame))
     play_count = play_time * app.fps  # 3 秒内的视频总帧数
     while (

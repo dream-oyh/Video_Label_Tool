@@ -1,10 +1,12 @@
+import threading
+
 import customtkinter as tk
 
 from component.InfoFrame import InfoFrame
 
 # from component.InfoFrame import InfoFrame
 from component.OptionGroup import OptionGroup
-from utils import OPTION
+from utils import OPTION, VIDEOSIZE
 
 
 class MyFrame(tk.CTkFrame):
@@ -24,7 +26,9 @@ class MyFrame(tk.CTkFrame):
         self.video_path_label.place(x=170, y=8)
 
         # 视频显示界面
-        self.video_frames = tk.CTkLabel(master=self, text="", width=750, height=450)
+        self.video_frames = tk.CTkLabel(
+            master=self, text="", width=VIDEOSIZE[0], height=VIDEOSIZE[1]
+        )
         self.video_frames.place(x=0, y=50, anchor="nw")
 
         # 加载上一个视频片段按钮
@@ -58,7 +62,7 @@ class MyFrame(tk.CTkFrame):
         self.save_button = tk.CTkButton(
             master=self,
             text="Save",
-            command=self.master.save_segment,
+            command=lambda: threading.Thread(target=self.master.save_segment).start(),
             state="disabled",
         )
         self.save_button.place(x=650, y=550)

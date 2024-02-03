@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 from pathlib import Path
 from tkinter import filedialog
 
@@ -7,10 +8,15 @@ import cv2
 from PIL import Image
 
 from core.ui import MyFrame
-from utils import OPTION
+from utils import OPTION, VIDEOSIZE
 
 output_path = Path("output")
 output_path.mkdir(exist_ok=True)
+
+
+class VideoFrameError(Exception):
+    def __init__(self, message, status):
+        super().__init__(message, status)
 
 
 class APP(tk.CTk):
@@ -20,6 +26,7 @@ class APP(tk.CTk):
         self.frame.grid(row=1, column=1)
         self.video: cv2.VideoCapture  # 视频
         self.cut_point = 0  # 当前切割点
+        self.image: tk.CTkImage
 
     @property
     def fps(self) -> float:
@@ -70,6 +77,13 @@ class APP(tk.CTk):
         """
         return self.video.get(cv2.CAP_PROP_POS_FRAMES)
 
+    @property
+    def segment_end(self) -> int:
+        """
+        获取当前分段的右端点（帧）
+        """
+        return self.cut_point + self.play_step_frame
+
     def update_frame_pos(self):
         """
         更新视频帧位置至当前切割点
@@ -114,6 +128,9 @@ class APP(tk.CTk):
         logging.info("Opening video file: " + file_path)
         self.frame.video_path_label.configure(text=file_path)
         self.video = cv2.VideoCapture(file_path)
+        assert self.video.isOpened(), "Video is not opened"
+        self.video.set(cv2.CAP_PROP_FRAME_WIDTH, VIDEOSIZE[0])
+        self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, VIDEOSIZE[1])
         self.cut_point = 0
         logging.debug(
             f"视频帧率：{self.fps}，视频总帧数：{self.frame_count}，视频总时间：{self.get_total_time}"
@@ -127,25 +144,27 @@ class APP(tk.CTk):
         播放一个视频片段
         """
         self.update_frame_pos()
-        while (
-            self.video.isOpened()
-            and self.video_frame <= self.cut_point + self.play_step_frame
-        ):
-            if not self.show_next_frame():
-                return
+        while self.video_frame <= self.cut_point + self.play_step_frame:
+            with suppress(VideoFrameError):
+                self.show_next_frame()
 
-    def show_next_frame(self) -> bool:
+    def show_next_frame(self):
         """
-        显示一帧，返回一个 bool 值代表是否成功
+        读取当前帧并显示
+        :raise
         """
-        ret, readyframe = self.video.read()
-        if not ret or readyframe is None:
-            return False
+        for _ in range(2):
+            ret = self.video.grab()
+            if not ret:
+                raise VideoFrameError("Cannot get video frame")
+        _, readyframe = self.video.retrieve()
+        if readyframe is None:
+            raise VideoFrameError("Cannot get video frame")
+
         frame = cv2.cvtColor(readyframe, cv2.COLOR_BGR2RGBA)  # 转至 RGB 色彩空间
-        image = tk.CTkImage(Image.fromarray(frame), size=(720, 480))
-        self.frame.video_frames.configure(image=image)
+        self.image = tk.CTkImage(Image.fromarray(frame), size=VIDEOSIZE)
+        self.frame.video_frames.configure(image=self.image)
         self.frame.video_frames.update()
-        return True
 
     def save_segment(self):
         """
@@ -155,19 +174,19 @@ class APP(tk.CTk):
         emotion = OPTION[option_num]
         output_path_sub = output_path / emotion
         output_path_sub.mkdir(exist_ok=True)
-        video_index: int = len(list(output_path_sub.glob("*.avi"))) + 1
+        video_index: int = len(list(output_path_sub.glob("*"))) + 1
         self.write_segment(
             output_path_sub / ".".join((emotion, str(video_index), "avi"))
         )
 
     def write_segment(self, path: Path):
         """
-        将片段写入文件
+        将视频片段写入文件
+        :param path: 文件路径
         """
         video = self.video
-        self.update_frame_pos()
         out = cv2.VideoWriter(
-            str(path.absolute()),
+            str(path),
             cv2.VideoWriter_fourcc(*"XVID"),
             self.fps,
             (
@@ -176,12 +195,9 @@ class APP(tk.CTk):
             ),
         )
 
-        while (
-            video.isOpened()
-            and self.video_frame <= self.cut_point + self.play_step_frame
-        ):
+        self.update_frame_pos()
+        while self.video_frame <= self.segment_end:
             ret, frame = video.read()
             if not ret or frame is None:
-                break
-            else:
-                out.write(frame)
+                raise VideoFrameError()
+            out.write(frame)

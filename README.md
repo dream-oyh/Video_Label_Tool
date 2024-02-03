@@ -39,8 +39,8 @@ poetry run python main.py
 
 # 标签文件夹的说明
 
-本程序会自动根据需要的标签，在程序运行文件夹下创建 label*folder 文件夹，并在其中创建以各个标签命名的子文件夹，每个子文件夹中存放着对应标签的视频分段，视频分段的命名为“标签名*分段序号.avi”
+本程序会自动根据需要的标签，在程序运行文件夹下创建 output 文件夹，并在其中创建以各个标签命名的子文件夹，每个子文件夹中存放着对应标签的视频分段，视频分段的命名为“标签名*分段序号.avi”
 
 # 标签更改
 
-若需要对标签进行更改，需要进入 `core/ui.py`，对 `MyFrame` 类中的 `option` 列表进行更改，标签顺序决定了 `core/app.py` 源码的 `save_segment` 函数中，`option_num` 对应的值，并且 `save_segment` 函数中各 `case` 存储路径也要随之调整
+若需要对标签进行更改，需要进入 `utils/__init__.py`，对 `OPTION` 列表进行更改，标签顺序决定了 `core/app.py` 源码的 `save_segment` 函数中，`option_num` 对应的值。

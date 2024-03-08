@@ -9,7 +9,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = APP()
 app.title("Video Label Tool")
-app.geometry("1080x720")
+width = app.frame.cget('width')
+height = app.frame.cget('height')
+app.geometry(str(width) + "x" + str(height))
 try:
     app.mainloop()
 finally:

@@ -22,7 +22,7 @@ class VideoFrameError(Exception):
 class APP(tk.CTk):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.frame = MyFrame(master=self, width=1080, height=720)
+        self.frame = MyFrame(master=self, width=1250, height=720)
         self.frame.grid(row=1, column=1)
         self.video: cv2.VideoCapture  # 视频
         self.cut_point = 0  # 当前切割点
@@ -188,7 +188,7 @@ class APP(tk.CTk):
         out = cv2.VideoWriter(
             str(path),
             cv2.VideoWriter_fourcc(*"XVID"),
-            self.fps,
+            25,
             (
                 int(video.get(cv2.CAP_PROP_FRAME_WIDTH)),
                 int(video.get(cv2.CAP_PROP_FRAME_HEIGHT)),

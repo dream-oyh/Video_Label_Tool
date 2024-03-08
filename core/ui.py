@@ -3,10 +3,11 @@ import threading
 import customtkinter as tk
 
 from component.InfoFrame import InfoFrame
+from component.MySlider import MySlider
 
 # from component.InfoFrame import InfoFrame
 from component.OptionGroup import OptionGroup
-from utils import OPTION, VIDEOSIZE
+from utils import FA_OPTION, OPTION, VIDEOSIZE
 
 
 class MyFrame(tk.CTkFrame):
@@ -79,13 +80,25 @@ class MyFrame(tk.CTkFrame):
         )
         self.playtime_enter.place(x=80, y=580)
 
-        # 标签选项设置
+        # emotion option
 
-        self.label_option = OptionGroup(master=self, option=OPTION)
-        self.label_option.place(x=800, y=100)
+        self.emo_option = OptionGroup(master=self, option=OPTION, state="disabled")
+        self.emo_option.place(x=800, y=50)
 
+        # potency and arousal option
+        text = ["potency", "arousal"]
+        self.num_slider = [
+            MySlider(master=self, text=text[i], state="disabled")
+            for i in range(len(text))
+        ]
+        self.num_slider[0].place(x=800, y=200)
+        self.num_slider[1].place(x=800, y=280)
+
+        # fatigue option
+        self.fatigue_option = OptionGroup(master=self, option=FA_OPTION, state="disabled")
+        self.fatigue_option.place(x=800, y=380)
         self.video_info = InfoFrame(master=self)
-        self.video_info.place(x=800, y=200, anchor="nw")
+        self.video_info.place(x=930, y=380, anchor="nw")
 
     def update_button_status(self, app):
         if getattr(app, "video", None):
@@ -94,5 +107,7 @@ class MyFrame(tk.CTkFrame):
                 self.load_button_prev,
                 self.reload_button,
                 self.save_button,
+                self.num_slider[0],
+                self.num_slider[1],
             ):
                 i.configure(state="normal")

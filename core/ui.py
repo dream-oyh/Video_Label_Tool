@@ -33,18 +33,18 @@ class MyFrame(tk.CTkFrame):
         self.video_frames.place(x=0, y=50, anchor="nw")
 
         # 加载上一个视频片段按钮
-        self.load_button_prev = tk.CTkButton(
-            master=self,
-            text="Load prev",
-            command=self.master.step_backward,
-            state="disabled",
-        )
-        self.load_button_prev.place(x=200, y=550)
+        # self.load_button_prev = tk.CTkButton(
+        #     master=self,
+        #     text="Load prev",
+        #     command=self.master.step_backward,
+        #     state="disabled",
+        # )
+        # self.load_button_prev.place(x=200, y=550)
 
         # 加载下一个视频片段按钮
         self.load_button_next = tk.CTkButton(
             master=self,
-            text="Load next",
+            text="Load next(n)",
             command=self.master.step_forward,
             state="disabled",
         )
@@ -62,15 +62,17 @@ class MyFrame(tk.CTkFrame):
         # 保存按钮
         self.save_button = tk.CTkButton(
             master=self,
-            text="Save",
+            text="Save(Enter)",
             command=lambda: threading.Thread(target=self.master.save_segment).start(),
             state="disabled",
         )
         self.save_button.place(x=650, y=550)
+        # self.save_button.bind("<Return>", lambda event: threading.Thread(target=self.master.save_segment).start())
+        # self.save_button.bind("<Enter>", self.save_button._clicked())
 
         # playtime 调整
         self.playtime_label = tk.CTkLabel(text="间隔步长/s:", master=self)
-        self.playtime_label.place(x=200, y=600)
+        self.playtime_label.place(x=350, y=600)
         self.playtime = tk.DoubleVar()
         self.playtime.set(3)
         self.playtime_enter = tk.CTkEntry(
@@ -78,11 +80,11 @@ class MyFrame(tk.CTkFrame):
             width=40,
             textvariable=self.playtime,
         )
-        self.playtime_enter.place(x=280, y=600)
+        self.playtime_enter.place(x=430, y=600)
         # save video or not
         self.save = tk.IntVar(value=0)
         self.check = tk.CTkCheckBox(master=self, text="Save video", variable=self.save)
-        self.check.place(x = 370, y = 600)
+        self.check.place(x=500, y=600)
 
         # emotion option
 
@@ -104,12 +106,11 @@ class MyFrame(tk.CTkFrame):
         self.video_info = InfoFrame(master=self)
         self.video_info.place(x=930, y=380, anchor="nw")
 
-
     def update_button_status(self, app):
         if getattr(app, "video", None):
             for i in (
                 self.load_button_next,
-                self.load_button_prev,
+                # self.load_button_prev,
                 self.reload_button,
                 self.save_button,
                 self.num_slider[0].slider,

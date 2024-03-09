@@ -113,6 +113,7 @@ class APP(tk.CTk):
         self.update_frame_pos()
         self.frame.video_info.update_info()
         self.play_video()
+        print("step")
 
     def step_backward(self):
         """
@@ -177,16 +178,32 @@ class APP(tk.CTk):
         """
         保存视频片段，在 csv 中记录标签
         """
+        self.label_info()
         if self.frame.check.get():
             option_num: int = self.frame.emo_option.num.get()
             emotion = OPTION[option_num]
             output_path_sub = self.f_path / output_path / emotion
-            output_path_sub.mkdir(exist_ok=True)
+            print(output_path_sub)
+            os.makedirs(output_path_sub, exist_ok=True)
+            # output_path_sub.mkdir(exist_ok=True)
             video_index: int = len(list(output_path_sub.glob("*"))) + 1
             self.write_segment(
-                output_path_sub / ".".join((emotion, str(video_index), "avi"))
+                output_path_sub
+                / (
+                    "_".join(
+                        (
+                            str(video_index),
+                            self.emo_label,
+                            self.fatigue_label,
+                            "potency(" + str(self.potency) + ")",
+                            "arousal(" + str(self.arousal) + ")",
+                        )
+                    )
+                    + ".avi"
+                )
             )
-        self.label_info()
+
+        print("saved")
 
     def write_segment(self, path: Path):
         """
@@ -240,25 +257,25 @@ class APP(tk.CTk):
         frame = self.frame
         emotion_num = frame.emo_option.num.get()
         fatigue_num = frame.fatigue_option.num.get()
-        emo_label = OPTION[emotion_num]
-        fatigue_label = FA_OPTION[fatigue_num]
-        potency = frame.num_slider[0].slider.get()
-        arousal = frame.num_slider[1].slider.get()
+        self.emo_label = OPTION[emotion_num]
+        self.fatigue_label = FA_OPTION[fatigue_num]
+        self.potency = frame.num_slider[0].slider.get()
+        self.arousal = frame.num_slider[1].slider.get()
         df = pd.read_csv(self.csv_path)
-        try: 
-          df.tail(1).iloc[0, 0]
+        try:
+            df.tail(1).iloc[0, 0]
         except:
             last_end_frame = 0
         else:
-          last_end_frame = df.tail(1).iloc[0,1]
+            last_end_frame = df.tail(1).iloc[0, 1]
 
         label_data = [
             last_end_frame,
             last_end_frame + self.play_step_frame,
-            emo_label,
-            potency,
-            arousal,
-            fatigue_label,
+            self.emo_label,
+            self.potency,
+            self.arousal,
+            self.fatigue_label,
         ]
         # print(df.tail(1))
         with open(self.csv_path, "a+", newline="") as f:

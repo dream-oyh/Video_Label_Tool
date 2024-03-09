@@ -168,6 +168,7 @@ class APP(tk.CTk):
             raise VideoFrameError("Cannot get video frame")
 
         frame = cv2.cvtColor(readyframe, cv2.COLOR_BGR2RGBA)  # 转至 RGB 色彩空间
+        # frame = cv2.resize(frame, dsize=(20, 80))
         self.image = tk.CTkImage(Image.fromarray(frame), size=VIDEOSIZE)
         self.frame.video_frames.configure(image=self.image)
         self.frame.video_frames.update()
@@ -212,7 +213,7 @@ class APP(tk.CTk):
 
     def init_csv(self):
         """
-        初始化csv文件
+        初始化 csv 文件
         """
         # f_path, file_name = os.path.split(self.file_path)
         csv_name = self.file_name[0:10]
@@ -224,15 +225,13 @@ class APP(tk.CTk):
             "arousal",
             "fatigue",
         ]
-        data_init = [0, 0]
+        # data_init = [-1]
         self.csv_path = str(self.f_path) + "/" + str(csv_name) + ".csv"
-        print(self.csv_path)
-        try:
-            os.listdir(self.csv_path)
-        except:
+        # print(os.path.exists(self.csv_path))
+        if not os.path.exists(self.csv_path):
             with open(self.csv_path, mode="w", newline="") as f:
                 csv.writer(f).writerow(header)
-                csv.writer(f).writerow(data_init)
+                # csv.writer(f).writerow(data_init)
 
     def label_info(self):
         """
@@ -246,7 +245,13 @@ class APP(tk.CTk):
         potency = frame.num_slider[0].slider.get()
         arousal = frame.num_slider[1].slider.get()
         df = pd.read_csv(self.csv_path)
-        last_end_frame = df.tail(1).iloc[0,1]
+        try: 
+          df.tail(1).iloc[0, 0]
+        except:
+            last_end_frame = 0
+        else:
+          last_end_frame = df.tail(1).iloc[0,1]
+
         label_data = [
             last_end_frame,
             last_end_frame + self.play_step_frame,
@@ -255,15 +260,6 @@ class APP(tk.CTk):
             arousal,
             fatigue_label,
         ]
-        if df.tail(1).shape[-1] == 2:
-            with open(self.csv_path, "r", newline="") as f:
-                data = list(csv.reader(f))
-                data.pop(-1)
-
-            with open(self.csv_path, "w", newline="") as f:
-                csv.writer(f).writerow(data)
-        
-        with open(self.csv_path, 'a+', newline='') as f:
+        # print(df.tail(1))
+        with open(self.csv_path, "a+", newline="") as f:
             csv.writer(f).writerow(label_data)
-
-        print(emotion_num)

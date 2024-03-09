@@ -70,7 +70,7 @@ class MyFrame(tk.CTkFrame):
 
         # playtime 调整
         self.playtime_label = tk.CTkLabel(text="间隔步长/s:", master=self)
-        self.playtime_label.place(x=80, y=550)
+        self.playtime_label.place(x=200, y=600)
         self.playtime = tk.DoubleVar()
         self.playtime.set(3)
         self.playtime_enter = tk.CTkEntry(
@@ -78,11 +78,15 @@ class MyFrame(tk.CTkFrame):
             width=40,
             textvariable=self.playtime,
         )
-        self.playtime_enter.place(x=80, y=580)
+        self.playtime_enter.place(x=280, y=600)
+        # save video or not
+        self.save = tk.IntVar(value=0)
+        self.check = tk.CTkCheckBox(master=self, text="Save video", variable=self.save)
+        self.check.place(x = 370, y = 600)
 
         # emotion option
 
-        self.emo_option = OptionGroup(master=self, option=OPTION, state="disabled")
+        self.emo_option = OptionGroup(master=self, option=OPTION, state="normal")
         self.emo_option.place(x=800, y=50)
 
         # potency and arousal option
@@ -95,10 +99,11 @@ class MyFrame(tk.CTkFrame):
         self.num_slider[1].place(x=800, y=280)
 
         # fatigue option
-        self.fatigue_option = OptionGroup(master=self, option=FA_OPTION, state="disabled")
+        self.fatigue_option = OptionGroup(master=self, option=FA_OPTION, state="normal")
         self.fatigue_option.place(x=800, y=380)
         self.video_info = InfoFrame(master=self)
         self.video_info.place(x=930, y=380, anchor="nw")
+
 
     def update_button_status(self, app):
         if getattr(app, "video", None):
@@ -107,7 +112,7 @@ class MyFrame(tk.CTkFrame):
                 self.load_button_prev,
                 self.reload_button,
                 self.save_button,
-                self.num_slider[0],
-                self.num_slider[1],
+                self.num_slider[0].slider,
+                self.num_slider[1].slider,
             ):
                 i.configure(state="normal")

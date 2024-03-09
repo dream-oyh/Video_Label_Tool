@@ -10,7 +10,7 @@ class MySlider(tk.CTkFrame):
         self.slider = tk.CTkSlider(
             master=self, from_=min, to=max, number_of_steps=solution, variable=self.x, state=state
         )
-        self.entry = tk.CTkEntry(master=self, textvariable=self.x, state=state)
+        self.entry = tk.CTkEntry(master=self, textvariable=self.x)
         self.label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
         self.slider.grid(row=1, column=0, padx=5, pady=5)
         self.entry.grid(row=1, column=1, padx=5, pady=5)

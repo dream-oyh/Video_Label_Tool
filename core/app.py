@@ -1,14 +1,17 @@
+import csv
 import logging
+import os
 from contextlib import suppress
 from pathlib import Path
 from tkinter import filedialog
 
 import customtkinter as tk
 import cv2
+import pandas as pd
 from PIL import Image
 
 from core.ui import MyFrame
-from utils import OPTION, VIDEOSIZE
+from utils import FA_OPTION, OPTION, VIDEOSIZE
 
 output_path = Path("output")
 output_path.mkdir(exist_ok=True)
@@ -124,10 +127,12 @@ class APP(tk.CTk):
         """
         打开视频文件
         """
-        file_path = filedialog.askopenfilename()
-        logging.info("Opening video file: " + file_path)
-        self.frame.video_path_label.configure(text=file_path)
-        self.video = cv2.VideoCapture(file_path)
+        self.file_path = filedialog.askopenfilename()
+        self.f_path, self.file_name = os.path.split(self.file_path)
+        print(self.f_path)
+        logging.info("Opening video file: " + self.file_path)
+        self.frame.video_path_label.configure(text=self.file_path)
+        self.video = cv2.VideoCapture(self.file_path)
         assert self.video.isOpened(), "Video is not opened"
         self.video.set(cv2.CAP_PROP_FRAME_WIDTH, VIDEOSIZE[0])
         self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, VIDEOSIZE[1])
@@ -137,6 +142,7 @@ class APP(tk.CTk):
         )
         self.frame.video_info.update_info()
         self.frame.update_button_status(self)
+        self.init_csv()
         self.play_video()
 
     def play_video(self):
@@ -168,16 +174,18 @@ class APP(tk.CTk):
 
     def save_segment(self):
         """
-        保存视频片段
+        保存视频片段，在 csv 中记录标签
         """
-        option_num: int = self.frame.label_option.num.get()
-        emotion = OPTION[option_num]
-        output_path_sub = output_path / emotion
-        output_path_sub.mkdir(exist_ok=True)
-        video_index: int = len(list(output_path_sub.glob("*"))) + 1
-        self.write_segment(
-            output_path_sub / ".".join((emotion, str(video_index), "avi"))
-        )
+        if self.frame.check.get():
+            option_num: int = self.frame.emo_option.num.get()
+            emotion = OPTION[option_num]
+            output_path_sub = self.f_path / output_path / emotion
+            output_path_sub.mkdir(exist_ok=True)
+            video_index: int = len(list(output_path_sub.glob("*"))) + 1
+            self.write_segment(
+                output_path_sub / ".".join((emotion, str(video_index), "avi"))
+            )
+        self.label_info()
 
     def write_segment(self, path: Path):
         """
@@ -201,3 +209,61 @@ class APP(tk.CTk):
             if not ret or frame is None:
                 raise VideoFrameError()
             out.write(frame)
+
+    def init_csv(self):
+        """
+        初始化csv文件
+        """
+        # f_path, file_name = os.path.split(self.file_path)
+        csv_name = self.file_name[0:10]
+        header = [
+            "start frame",
+            "end frame",
+            "emotion",
+            "potency",
+            "arousal",
+            "fatigue",
+        ]
+        data_init = [0, 0]
+        self.csv_path = str(self.f_path) + "/" + str(csv_name) + ".csv"
+        print(self.csv_path)
+        try:
+            os.listdir(self.csv_path)
+        except:
+            with open(self.csv_path, mode="w", newline="") as f:
+                csv.writer(f).writerow(header)
+                csv.writer(f).writerow(data_init)
+
+    def label_info(self):
+        """
+        读取并写入用户设置的标签
+        """
+        frame = self.frame
+        emotion_num = frame.emo_option.num.get()
+        fatigue_num = frame.fatigue_option.num.get()
+        emo_label = OPTION[emotion_num]
+        fatigue_label = FA_OPTION[fatigue_num]
+        potency = frame.num_slider[0].slider.get()
+        arousal = frame.num_slider[1].slider.get()
+        df = pd.read_csv(self.csv_path)
+        last_end_frame = df.tail(1).iloc[0,1]
+        label_data = [
+            last_end_frame,
+            last_end_frame + self.play_step_frame,
+            emo_label,
+            potency,
+            arousal,
+            fatigue_label,
+        ]
+        if df.tail(1).shape[-1] == 2:
+            with open(self.csv_path, "r", newline="") as f:
+                data = list(csv.reader(f))
+                data.pop(-1)
+
+            with open(self.csv_path, "w", newline="") as f:
+                csv.writer(f).writerow(data)
+        
+        with open(self.csv_path, 'a+', newline='') as f:
+            csv.writer(f).writerow(label_data)
+
+        print(emotion_num)

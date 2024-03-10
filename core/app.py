@@ -15,8 +15,8 @@ from component.MyText import TextRedirector
 from core.ui import MyFrame
 from utils import FA_OPTION, OPTION, VIDEOSIZE
 
-output_path = Path("output")
-output_path.mkdir(exist_ok=True)
+# output_path = Path("output")
+# output_path.mkdir(exist_ok=True)
 
 
 class VideoFrameError(Exception):
@@ -28,7 +28,7 @@ class APP(tk.CTk):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.frame = MyFrame(master=self, width=1200, height=900)
-        self.frame.grid(row=1, column=1)
+        self.frame.grid(row=1, column=1, padx=250, pady=50)
         self.video: cv2.VideoCapture  # 视频
         self.cut_point = 0  # 当前切割点
         self.image: tk.CTkImage
@@ -164,8 +164,7 @@ class APP(tk.CTk):
                 self.show_next_frame()
 
     def reload_video(self):
-        self.redirectPrint()
-        print("This video clip has reloaded.\n")
+        self.redirectPrint("This video clip has reloaded.\n")
         self.play_video()
 
     def show_next_frame(self):
@@ -196,6 +195,8 @@ class APP(tk.CTk):
         if self.frame.check.get():
             option_num: int = self.frame.emo_option.num.get()
             emotion = OPTION[option_num]
+            output_path = Path("output")
+            output_path.mkdir(exist_ok=True)
             output_path_sub = self.f_path / output_path / emotion
             print(output_path_sub)
             os.makedirs(output_path_sub, exist_ok=True)

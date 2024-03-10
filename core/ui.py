@@ -1,11 +1,10 @@
-import threading
 import sys
-from component.MyText import TextRedirector
 
 import customtkinter as tk
-
+import threading
 from component.InfoFrame import InfoFrame
 from component.MySlider import MySlider
+from component.MyText import TextRedirector
 
 # from component.InfoFrame import InfoFrame
 from component.OptionGroup import OptionGroup
@@ -68,13 +67,19 @@ class MyFrame(tk.CTkFrame):
             command=lambda: threading.Thread(target=self.master.save_segment).start(),
             state="disabled",
         )
+        # self.save_button = tk.CTkButton(
+        #     master=self,
+        #     text="Save(Enter)",
+        #     command=self.master.save_segment,
+        #     state="disabled",
+        # )
         self.save_button.place(x=450, y=550)
         # self.save_button.bind("<Return>", lambda event: threading.Thread(target=self.master.save_segment).start())
         # self.save_button.bind("<Enter>", self.save_button._clicked())
 
         # playtime 调整
         self.playtime_label = tk.CTkLabel(text="间隔步长/s:", master=self)
-        self.playtime_label.place(x=150, y=600)
+        self.playtime_label.place(x=1000, y=50)
         self.playtime = tk.DoubleVar()
         self.playtime.set(3)
         self.playtime_enter = tk.CTkEntry(
@@ -82,11 +87,11 @@ class MyFrame(tk.CTkFrame):
             width=40,
             textvariable=self.playtime,
         )
-        self.playtime_enter.place(x=230, y=600)
+        self.playtime_enter.place(x=1100, y=50)
         # save video or not
         self.save = tk.IntVar(value=0)
         self.check = tk.CTkCheckBox(master=self, text="Save video", variable=self.save)
-        self.check.place(x=300, y=600)
+        self.check.place(x=1000, y=120)
 
         # emotion option
 

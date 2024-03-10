@@ -1,6 +1,7 @@
 import csv
 import logging
 import os
+import sys
 from contextlib import suppress
 from pathlib import Path
 from tkinter import filedialog
@@ -10,6 +11,7 @@ import cv2
 import pandas as pd
 from PIL import Image
 
+from component.MyText import TextRedirector
 from core.ui import MyFrame
 from utils import FA_OPTION, OPTION, VIDEOSIZE
 
@@ -25,7 +27,7 @@ class VideoFrameError(Exception):
 class APP(tk.CTk):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.frame = MyFrame(master=self, width=1250, height=720)
+        self.frame = MyFrame(master=self, width=1200, height=900)
         self.frame.grid(row=1, column=1)
         self.video: cv2.VideoCapture  # 视频
         self.cut_point = 0  # 当前切割点
@@ -109,11 +111,15 @@ class APP(tk.CTk):
         """
         向后移动一步 cursor，并播放视频片段
         """
+        self.redirectPrint(
+            "The video cut point has stepped forward to "
+            + str(self.cut_point + self.play_step_frame)
+            + "th frame"
+        )
         self.move_cursor(self.play_step_frame)
         self.update_frame_pos()
         self.frame.video_info.update_info()
         self.play_video()
-        print("step")
 
     def step_backward(self):
         """
@@ -130,7 +136,9 @@ class APP(tk.CTk):
         """
         self.file_path = filedialog.askopenfilename()
         self.f_path, self.file_name = os.path.split(self.file_path)
-        print(self.f_path)
+        self.redirectPrint(
+            "You have opened the video! The video name is:\n" + self.file_name
+        )
         logging.info("Opening video file: " + self.file_path)
         self.frame.video_path_label.configure(text=self.file_path)
         self.video = cv2.VideoCapture(self.file_path)
@@ -138,8 +146,8 @@ class APP(tk.CTk):
         self.video.set(cv2.CAP_PROP_FRAME_WIDTH, VIDEOSIZE[0])
         self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, VIDEOSIZE[1])
         self.cut_point = 0
-        logging.debug(
-            f"视频帧率：{self.fps}，视频总帧数：{self.frame_count}，视频总时间：{self.get_total_time}"
+        self.redirectPrint(
+            f"视频帧率：{self.fps}\n视频总帧数：{self.frame_count}\n视频总时间：{self.get_total_time}\n"
         )
         self.frame.video_info.update_info()
         self.frame.update_button_status(self)
@@ -154,6 +162,11 @@ class APP(tk.CTk):
         while self.video_frame <= self.cut_point + self.play_step_frame:
             with suppress(VideoFrameError):
                 self.show_next_frame()
+
+    def reload_video(self):
+        self.redirectPrint()
+        print("This video clip has reloaded.\n")
+        self.play_video()
 
     def show_next_frame(self):
         """
@@ -178,6 +191,7 @@ class APP(tk.CTk):
         """
         保存视频片段，在 csv 中记录标签
         """
+        self.redirectPrint("This video clip has saved.")
         self.label_info()
         if self.frame.check.get():
             option_num: int = self.frame.emo_option.num.get()
@@ -202,8 +216,6 @@ class APP(tk.CTk):
                     + ".avi"
                 )
             )
-
-        print("saved")
 
     def write_segment(self, path: Path):
         """
@@ -254,6 +266,7 @@ class APP(tk.CTk):
         """
         读取并写入用户设置的标签
         """
+        self.redirectPrint("Your labels are showed below.")
         frame = self.frame
         emotion_num = frame.emo_option.num.get()
         fatigue_num = frame.fatigue_option.num.get()
@@ -280,3 +293,10 @@ class APP(tk.CTk):
         # print(df.tail(1))
         with open(self.csv_path, "a+", newline="") as f:
             csv.writer(f).writerow(label_data)
+        df = pd.read_csv(self.csv_path)
+        print(df.tail(1))
+        print("\n")
+
+    def redirectPrint(self, text):
+        sys.stdout = TextRedirector(self.frame.text)
+        print(text + "\n")

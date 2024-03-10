@@ -1,4 +1,6 @@
 import threading
+import sys
+from component.MyText import TextRedirector
 
 import customtkinter as tk
 
@@ -48,16 +50,16 @@ class MyFrame(tk.CTkFrame):
             command=self.master.step_forward,
             state="disabled",
         )
-        self.load_button_next.place(x=350, y=550)
+        self.load_button_next.place(x=150, y=550)
 
         # 重新播放视频片段按钮
         self.reload_button = tk.CTkButton(
             master=self,
             text="Reload",
-            command=self.master.play_video,
+            command=self.master.reload_video,
             state="disabled",
         )
-        self.reload_button.place(x=500, y=550)
+        self.reload_button.place(x=300, y=550)
 
         # 保存按钮
         self.save_button = tk.CTkButton(
@@ -66,13 +68,13 @@ class MyFrame(tk.CTkFrame):
             command=lambda: threading.Thread(target=self.master.save_segment).start(),
             state="disabled",
         )
-        self.save_button.place(x=650, y=550)
+        self.save_button.place(x=450, y=550)
         # self.save_button.bind("<Return>", lambda event: threading.Thread(target=self.master.save_segment).start())
         # self.save_button.bind("<Enter>", self.save_button._clicked())
 
         # playtime 调整
         self.playtime_label = tk.CTkLabel(text="间隔步长/s:", master=self)
-        self.playtime_label.place(x=350, y=600)
+        self.playtime_label.place(x=150, y=600)
         self.playtime = tk.DoubleVar()
         self.playtime.set(3)
         self.playtime_enter = tk.CTkEntry(
@@ -80,11 +82,11 @@ class MyFrame(tk.CTkFrame):
             width=40,
             textvariable=self.playtime,
         )
-        self.playtime_enter.place(x=430, y=600)
+        self.playtime_enter.place(x=230, y=600)
         # save video or not
         self.save = tk.IntVar(value=0)
         self.check = tk.CTkCheckBox(master=self, text="Save video", variable=self.save)
-        self.check.place(x=500, y=600)
+        self.check.place(x=300, y=600)
 
         # emotion option
 
@@ -105,6 +107,12 @@ class MyFrame(tk.CTkFrame):
         self.fatigue_option.place(x=800, y=380)
         self.video_info = InfoFrame(master=self)
         self.video_info.place(x=930, y=380, anchor="nw")
+
+        # output text
+        self.text = tk.CTkTextbox(master=self, width=1000, height=250)
+        self.text.place(x=50, y=600, anchor="nw")
+        sys.stdout = TextRedirector(self.text, "stdout")
+        # print("for test")
 
     def update_button_status(self, app):
         if getattr(app, "video", None):

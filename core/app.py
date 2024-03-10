@@ -113,11 +113,16 @@ class APP(tk.CTk):
         """
         向后移动一步 cursor，并播放视频片段
         """
-        self.redirectPrint(
-            "The video cut point has stepped forward to "
-            + str(self.cut_point + self.play_step_frame)
-            + "th frame"
-        )
+        if self.cut_point + self.play_step_frame > self.frame_count:
+            self.redirectPrint(
+                "[ERROR] The video is over, you can't get next clip ! Please open next video file."
+            )
+        else:
+            self.redirectPrint(
+                "The video cut point has stepped forward to "
+                + str(self.cut_point + self.play_step_frame)
+                + "th frame"
+            )
         self.move_cursor(self.play_step_frame)
         self.update_frame_pos()
         self.frame.video_info.update_info()
@@ -305,6 +310,7 @@ class APP(tk.CTk):
     def redirectPrint(self, text):
         sys.stdout = TextRedirector(self.frame.text)
         print(text + "\n")
+
     def reset_file_count(self):
         self.file_count = 0
-        self.frame.file_count_num.configure(text = str(self.file_count))
+        self.frame.file_count_num.configure(text=str(self.file_count))

@@ -96,20 +96,24 @@ class MyFrame(tk.CTkFrame):
 
         # emotion option
 
-        self.emo_option = OptionGroup(master=self, option=OPTION, state="normal")
+        self.emo_option = OptionGroup(
+            master=self, option=OPTION, default=2, state="normal"
+        )
         self.emo_option.place(x=800, y=50)
 
         # potency and arousal option
-        text = ["potency", "arousal"]
+        text = {"potency": 5, "arousal": 2}
         self.num_slider = [
-            MySlider(master=self, text=text[i], state="disabled")
-            for i in range(len(text))
+            MySlider(master=self, text=key, default=item, state="disabled")
+            for key, item in text.items()
         ]
         self.num_slider[0].place(x=800, y=200)
         self.num_slider[1].place(x=800, y=280)
 
         # fatigue option
-        self.fatigue_option = OptionGroup(master=self, option=FA_OPTION, state="normal")
+        self.fatigue_option = OptionGroup(
+            master=self, option=FA_OPTION, default=1, state="normal"
+        )
         self.fatigue_option.place(x=800, y=380)
         self.video_info = InfoFrame(master=self)
         self.video_info.place(x=930, y=380, anchor="nw")

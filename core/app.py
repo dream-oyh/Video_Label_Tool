@@ -1,5 +1,6 @@
 import csv
 import logging
+import threading
 import os
 import sys
 from contextlib import suppress
@@ -117,16 +118,20 @@ class APP(tk.CTk):
             self.redirectPrint(
                 "[ERROR] The video is over, you can't get next clip ! Please open next video file."
             )
+            self.frame.load_button_next.configure(state="disabled")
+            self.frame.save_button.configure(state="disabled")
+            self.unbind("<Return>")
+            self.unbind("<Key-n>")
         else:
             self.redirectPrint(
                 "The video cut point has stepped forward to "
                 + str(self.cut_point + self.play_step_frame)
                 + "th frame"
             )
-        self.move_cursor(self.play_step_frame)
-        self.update_frame_pos()
-        self.frame.video_info.update_info()
-        self.play_video()
+            self.move_cursor(self.play_step_frame)
+            self.update_frame_pos()
+            self.frame.video_info.update_info()
+            self.play_video()
 
     def step_backward(self):
         """
@@ -149,6 +154,8 @@ class APP(tk.CTk):
         self.file_count += 1
         self.frame.file_count_num.configure(text=str(self.file_count))
         logging.info("Opening video file: " + self.file_path)
+        self.bind("<Return>", lambda event: threading.Thread(target=self.save_segment).start())
+        self.bind("<Key-n>", lambda _: self.step_forward())
         self.frame.video_path_label.configure(text=self.file_path)
         self.video = cv2.VideoCapture(self.file_path)
         assert self.video.isOpened(), "Video is not opened"

@@ -35,13 +35,13 @@ class MyFrame(tk.CTkFrame):
         self.video_frames.place(x=0, y=50, anchor="nw")
 
         # 加载上一个视频片段按钮
-        # self.load_button_prev = tk.CTkButton(
-        #     master=self,
-        #     text="Load prev",
-        #     command=self.master.step_backward,
-        #     state="disabled",
-        # )
-        # self.load_button_prev.place(x=200, y=550)
+        self.load_button_prev = tk.CTkButton(
+            master=self,
+            text="Load prev(l)",
+            command=self.master.step_backward,
+            state="disabled",
+        )
+        self.load_button_prev.place(x=50, y=550)
 
         # 加载下一个视频片段按钮
         self.load_button_next = tk.CTkButton(
@@ -50,7 +50,7 @@ class MyFrame(tk.CTkFrame):
             command=self.master.step_forward,
             state="disabled",
         )
-        self.load_button_next.place(x=150, y=550)
+        self.load_button_next.place(x=200, y=550)
 
         # 重新播放视频片段按钮
         self.reload_button = tk.CTkButton(
@@ -59,7 +59,7 @@ class MyFrame(tk.CTkFrame):
             command=self.master.reload_video,
             state="disabled",
         )
-        self.reload_button.place(x=300, y=550)
+        self.reload_button.place(x=350, y=550)
 
         # 保存按钮
         self.save_button = tk.CTkButton(
@@ -68,15 +68,7 @@ class MyFrame(tk.CTkFrame):
             command=lambda: threading.Thread(target=self.master.save_segment).start(),
             state="disabled",
         )
-        # self.save_button = tk.CTkButton(
-        #     master=self,
-        #     text="Save(Enter)",
-        #     command=self.master.save_segment,
-        #     state="disabled",
-        # )
-        self.save_button.place(x=450, y=550)
-        # self.save_button.bind("<Return>", lambda event: threading.Thread(target=self.master.save_segment).start())
-        # self.save_button.bind("<Enter>", self.save_button._clicked())
+        self.save_button.place(x=500, y=550)
 
         # playtime 调整
         self.playtime_label = tk.CTkLabel(text="间隔步长/s:", master=self)

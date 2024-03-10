@@ -9,6 +9,7 @@ from tkinter import filedialog
 
 import customtkinter as tk
 import cv2
+import pandas
 import pandas as pd
 from PIL import Image
 
@@ -35,6 +36,10 @@ class APP(tk.CTk):
         self.cut_point = 0  # 当前切割点
         self.image: tk.CTkImage
         self.frame.file_count_num.configure(text=str(self.file_count))
+        if os.path.exists(".cache"):
+            with open(".cache/last_open.txt", "r") as f:
+                last_open = f.read()
+                self.frame.video_path_label.configure(text="您上次打开的文件是：" + str(last_open))
 
     @property
     def fps(self) -> float:
@@ -114,25 +119,19 @@ class APP(tk.CTk):
         """
         向后移动一步 cursor，并播放视频片段
         """
+        self.set_bind("l")
         if self.cut_point + self.play_step_frame > self.frame_count:
             self.redirectPrint(
                 "[ERROR] The video is over, you can't get next clip ! Please open next video file."
             )
-            self.frame.load_button_next.configure(state="disabled")
-            self.frame.save_button.configure(state="disabled")
-            self.unbind("<Return>")
-            self.unbind("<Key-n>")
+            self.unbind(["E", "n"])
         else:
             self.redirectPrint(
                 "The video cut point has stepped forward to "
                 + str(self.cut_point + self.play_step_frame)
                 + "th frame"
             )
-            self.frame.save_button.configure(state="normal")
-            self.bind(
-                "<Return>",
-                lambda event: threading.Thread(target=self.save_segment).start(),
-            )
+            self.set_bind("E")
             self.move_cursor(self.play_step_frame)
             self.update_frame_pos()
             self.frame.video_info.update_info()
@@ -142,16 +141,45 @@ class APP(tk.CTk):
         """
         向前移动一步 cursor，并播放视频片段
         """
-        self.move_cursor(-self.play_step_frame)
-        self.update_frame_pos()
-        self.frame.video_info.update_info()
-        self.play_video()
+        if self.cut_point >= self.play_step_frame:
+            self.redirectPrint(
+                "The video cut point has stepped backward to "
+                + str(self.cut_point - self.play_step_frame)
+                + "th frame"
+            )
+            self.redirectPrint(
+                "[LOADING] The last record is deleting. Please loading ......"
+            )
+            if self.frame.save_button.cget("state") == "normal":
+                self.delete_record(self.csv_path, 1)
+                self.redirectPrint(
+                    "You have deleted the last record. Now you can re-record this clip label."
+                )
+            if self.frame.save_button.cget("state") == "disabled":
+                self.delete_record(self.csv_path, 2)
+                self.redirectPrint(
+                    "You have deleted the last record. Now you can re-record this clip label."
+                )
+                self.redirectPrint(
+                    "[WARNING] Because of you have added a new label, so this label will be deleted as well. You need to re-record it again."
+                )
+            self.set_bind("E")
+            self.move_cursor(-self.play_step_frame)
+            self.update_frame_pos()
+            self.frame.video_info.update_info()
+            self.play_video()
+        else:
+            self.redirectPrint("[ERROR] You have arrived the head of this video! ")
+            self.set_unbind("l")
 
     def open_video(self):
         """
         打开视频文件
         """
         self.file_path = filedialog.askopenfilename()
+        os.makedirs(".cache", exist_ok=True)
+        with open(".cache/last_open.txt", "w", newline="") as f:
+            f.write(self.file_path)
         self.f_path, self.file_name = os.path.split(self.file_path)
         self.redirectPrint(
             "You have opened the video! The video name is:\n" + self.file_name
@@ -159,10 +187,7 @@ class APP(tk.CTk):
         self.file_count += 1
         self.frame.file_count_num.configure(text=str(self.file_count))
         logging.info("Opening video file: " + self.file_path)
-        self.bind(
-            "<Return>", lambda event: threading.Thread(target=self.save_segment).start()
-        )
-        self.bind("<Key-n>", lambda _: self.step_forward())
+        self.set_bind(["E", "n"])
         self.frame.video_path_label.configure(text=self.file_path)
         self.video = cv2.VideoCapture(self.file_path)
         assert self.video.isOpened(), "Video is not opened"
@@ -215,7 +240,7 @@ class APP(tk.CTk):
         """
         self.redirectPrint("This video clip has saved.")
         self.frame.save_button.configure(state="disabled")
-        self.unbind("<Return>")
+        self.set_unbind("E")
         self.label_info()
         if self.frame.check.get():
             option_num: int = self.frame.emo_option.num.get()
@@ -223,7 +248,7 @@ class APP(tk.CTk):
             output_path = Path("output")
             output_path.mkdir(exist_ok=True)
             output_path_sub = self.f_path / output_path / emotion
-            print(output_path_sub)
+            # print(output_path_sub)
             os.makedirs(output_path_sub, exist_ok=True)
             # output_path_sub.mkdir(exist_ok=True)
             video_index: int = len(list(output_path_sub.glob("*"))) + 1
@@ -324,9 +349,63 @@ class APP(tk.CTk):
         print("\n")
 
     def redirectPrint(self, text):
+        """
+        print 至输出框
+        """
         sys.stdout = TextRedirector(self.frame.text)
         print(text + "\n")
 
     def reset_file_count(self):
+        """
+        重置已打开文件数
+        """
         self.file_count = 0
         self.frame.file_count_num.configure(text=str(self.file_count))
+
+    def set_bind(self, keys: list[str]):
+        """
+        设置快捷键
+        :str: 快捷键的值，支持通过列表一次设置多个快捷键
+        "E": "Save button"
+        "n": "Load next button"
+        "l:" "Load prev button"
+        """
+        for key in keys:
+            if key == "E":
+                self.bind(
+                    "<Return>",
+                    lambda event: threading.Thread(target=self.save_segment).start(),
+                )
+                self.frame.save_button.configure(state="normal")
+            elif key == "n":
+                self.bind("<Key-n>", lambda _: self.step_forward())
+                self.frame.load_button_next.configure(state="normal")
+            elif key == "l":
+                self.bind("<Key-l>", lambda _: self.step_backward())
+                self.frame.load_button_prev.configure(state="normal")
+
+    def set_unbind(self, keys: list[str]):
+        """
+        取消快捷键
+        设置同'set_bind()'
+        """
+        for key in keys:
+            if key == "E":
+                self.unbind("<Return>")
+                self.frame.save_button.configure(state="disabled")
+            elif key == "n":
+                self.unbind("<Key-n>")
+                self.frame.load_button_next.configure(state="disabled")
+            elif key == "l":
+                self.unbind("<Key-l>")
+                self.frame.load_button_prev.configure(state="disabled")
+
+    def delete_record(self, path, num):
+        """
+        删除 csv 中存储数据
+        :path(str) csv 路径
+        :num(int) 删除数据条目
+        """
+        df = pandas.read_csv(path)
+        df.drop(index=df.tail(num).index, axis=0, inplace=True)
+        df.to_csv(path)

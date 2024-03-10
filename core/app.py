@@ -305,3 +305,6 @@ class APP(tk.CTk):
     def redirectPrint(self, text):
         sys.stdout = TextRedirector(self.frame.text)
         print(text + "\n")
+    def reset_file_count(self):
+        self.file_count = 0
+        self.frame.file_count_num.configure(text = str(self.file_count))

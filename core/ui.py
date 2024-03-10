@@ -115,18 +115,24 @@ class MyFrame(tk.CTkFrame):
         self.video_info.place(x=930, y=380, anchor="nw")
 
         # output text
-        self.text = tk.CTkTextbox(master=self, width=1000, height=250)
+        self.text = tk.CTkTextbox(master=self, width=900, height=250)
         self.text.place(x=50, y=600, anchor="nw")
         sys.stdout = TextRedirector(self.text, "stdout")
         # print("for test")
 
         # file count
         self.file_count_label = tk.CTkLabel(master=self, text="File count")
-        self.file_count_label.place(x=1080, y=650)
+        self.file_count_label.place(x=1040, y=650)
         self.file_count_num = tk.CTkLabel(
             master=self, text=str(self.master.file_count), font=("", 30)
         )
-        self.file_count_num.place(x=1100, y=700)
+        self.file_count_num.place(x=1060, y=700)
+
+        # reset file count button
+        self.rest_file_count_button = tk.CTkButton(
+            master=self, text="reset", command=self.master.reset_file_count
+        )
+        self.rest_file_count_button.place(x=1000, y=750)
 
     def update_button_status(self, app):
         if getattr(app, "video", None):

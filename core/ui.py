@@ -1,7 +1,8 @@
 import sys
+import threading
 
 import customtkinter as tk
-import threading
+
 from component.InfoFrame import InfoFrame
 from component.MySlider import MySlider
 from component.MyText import TextRedirector
@@ -118,6 +119,14 @@ class MyFrame(tk.CTkFrame):
         self.text.place(x=50, y=600, anchor="nw")
         sys.stdout = TextRedirector(self.text, "stdout")
         # print("for test")
+
+        # file count
+        self.file_count_label = tk.CTkLabel(master=self, text="File count")
+        self.file_count_label.place(x=1080, y=650)
+        self.file_count_num = tk.CTkLabel(
+            master=self, text=str(self.master.file_count), font=("", 30)
+        )
+        self.file_count_num.place(x=1100, y=700)
 
     def update_button_status(self, app):
         if getattr(app, "video", None):

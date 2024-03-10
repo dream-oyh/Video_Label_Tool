@@ -27,11 +27,13 @@ class VideoFrameError(Exception):
 class APP(tk.CTk):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.file_count = 0  # 打开文件个数
         self.frame = MyFrame(master=self, width=1200, height=900)
         self.frame.grid(row=1, column=1, padx=250, pady=50)
         self.video: cv2.VideoCapture  # 视频
         self.cut_point = 0  # 当前切割点
         self.image: tk.CTkImage
+        self.frame.file_count_num.configure(text=str(self.file_count))
 
     @property
     def fps(self) -> float:
@@ -139,6 +141,8 @@ class APP(tk.CTk):
         self.redirectPrint(
             "You have opened the video! The video name is:\n" + self.file_name
         )
+        self.file_count += 1
+        self.frame.file_count_num.configure(text=str(self.file_count))
         logging.info("Opening video file: " + self.file_path)
         self.frame.video_path_label.configure(text=self.file_path)
         self.video = cv2.VideoCapture(self.file_path)

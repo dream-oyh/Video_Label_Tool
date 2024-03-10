@@ -1,8 +1,8 @@
 import csv
 import logging
-import threading
 import os
 import sys
+import threading
 from contextlib import suppress
 from pathlib import Path
 from tkinter import filedialog
@@ -128,6 +128,11 @@ class APP(tk.CTk):
                 + str(self.cut_point + self.play_step_frame)
                 + "th frame"
             )
+            self.frame.save_button.configure(state="normal")
+            self.bind(
+                "<Return>",
+                lambda event: threading.Thread(target=self.save_segment).start(),
+            )
             self.move_cursor(self.play_step_frame)
             self.update_frame_pos()
             self.frame.video_info.update_info()
@@ -154,7 +159,9 @@ class APP(tk.CTk):
         self.file_count += 1
         self.frame.file_count_num.configure(text=str(self.file_count))
         logging.info("Opening video file: " + self.file_path)
-        self.bind("<Return>", lambda event: threading.Thread(target=self.save_segment).start())
+        self.bind(
+            "<Return>", lambda event: threading.Thread(target=self.save_segment).start()
+        )
         self.bind("<Key-n>", lambda _: self.step_forward())
         self.frame.video_path_label.configure(text=self.file_path)
         self.video = cv2.VideoCapture(self.file_path)
@@ -207,6 +214,8 @@ class APP(tk.CTk):
         保存视频片段，在 csv 中记录标签
         """
         self.redirectPrint("This video clip has saved.")
+        self.frame.save_button.configure(state="disabled")
+        self.unbind("<Return>")
         self.label_info()
         if self.frame.check.get():
             option_num: int = self.frame.emo_option.num.get()

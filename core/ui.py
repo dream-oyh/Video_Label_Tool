@@ -41,7 +41,7 @@ class MyFrame(tk.CTkFrame):
             variable=self.mode,
             text="preview mode",
             command=self.master.mode_switch,
-            state="disabled"
+            state="disabled",
         )
         self.mode_switch.place(x=50, y=550)
 
@@ -144,12 +144,12 @@ class MyFrame(tk.CTkFrame):
     def update_button_status(self, app):
         if getattr(app, "video", None):
             for i in (
-                self.load_button_next,
+                # self.load_button_next,
                 # self.load_button_prev,
                 self.reload_button,
                 self.save_button,
                 self.num_slider[0].slider,
                 self.num_slider[1].slider,
-                self.mode_switch
+                self.mode_switch,
             ):
                 i.configure(state="normal")

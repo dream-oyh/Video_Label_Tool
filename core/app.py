@@ -36,19 +36,20 @@ class APP(tk.CTk):
         self.cut_point = 0  # 当前切割点
         self.image: tk.CTkImage
         self.frame.file_count_num.configure(text=str(self.file_count))
-        if os.path.exists(".cache"):
-            with open(".cache/last_open.txt", "r") as f:
-                try:
-                    self.last_open = f.readlines()[-1]
-                except:
-                    self.frame.video_path_label.configure(
-                        text="请选择你的第一个视频文件"
-                    )
-                    self.last_open = "0"
-                else:
-                    self.frame.video_path_label.configure(
-                        text="您上次打开的文件是：" + str(self.last_open)
-                    )
+        if not os.path.exists(".cache"):
+            os.makedirs(".cache", exist_ok=True)
+            with open(".cache/last_open.txt", "w", newline="") as f:
+                f.write("")
+        with open(".cache/last_open.txt", "r") as f:
+            try:
+                self.last_open = f.readlines()[-1]
+            except:
+                self.frame.video_path_label.configure(text="请选择你的第一个视频文件")
+                self.last_open = "0"
+            else:
+                self.frame.video_path_label.configure(
+                    text="您上次打开的文件是：" + str(self.last_open)
+                )
 
     @property
     def fps(self) -> float:
@@ -202,10 +203,8 @@ class APP(tk.CTk):
         打开视频文件
         """
         self.file_path = filedialog.askopenfilename()
-        logging.info(self.file_path)
-        logging.info(self.last_open)
-        logging.info(self.last_open.rstrip() == self.file_path)
-        os.makedirs(".cache", exist_ok=True)
+        self.frame.load_button_next.configure(state="disabled")
+        self.frame.load_button_prev.configure(state="disabled")
         if str(self.last_open.rstrip()) != str(self.file_path):
             with open(".cache/last_open.txt", "a+") as f:
                 f.write(self.file_path)

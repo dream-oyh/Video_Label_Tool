@@ -35,7 +35,7 @@ class InfoFrame(tk.CTkFrame):
 
     def update_info(self):
         app = self.master.master
-        self.totaltime_label.val.configure(text=str(app.get_total_time))
+        self.totaltime_label.val.configure(text=str(format(app.get_total_time, ".2f")))
         self.fps_label.val.configure(text=str(app.fps))
         self.frame_count_label.val.configure(text=str(app.frame_count))
         self.cut_point_label.val.configure(text=str(app.cut_point))

@@ -38,8 +38,17 @@ class APP(tk.CTk):
         self.frame.file_count_num.configure(text=str(self.file_count))
         if os.path.exists(".cache"):
             with open(".cache/last_open.txt", "r") as f:
-                last_open = f.read()
-                self.frame.video_path_label.configure(text="您上次打开的文件是：" + str(last_open))
+                try:
+                    self.last_open = f.readlines()[-1]
+                except:
+                    self.frame.video_path_label.configure(
+                        text="请选择你的第一个视频文件"
+                    )
+                    self.last_open = "0"
+                else:
+                    self.frame.video_path_label.configure(
+                        text="您上次打开的文件是：" + str(self.last_open)
+                    )
 
     @property
     def fps(self) -> float:
@@ -131,7 +140,12 @@ class APP(tk.CTk):
                 + str(self.cut_point + self.play_step_frame)
                 + "th frame"
             )
-            self.set_bind("E")
+            if self.frame.mode_switch.get() == 0:
+                self.set_bind("E")
+                self.set_unbind("n")
+            # self.set_bind("E")
+            # if self.frame.mode_switch.get() == 1:
+            #     self.set_unbind("n")
             self.move_cursor(self.play_step_frame)
             self.update_frame_pos()
             self.frame.video_info.update_info()
@@ -147,15 +161,24 @@ class APP(tk.CTk):
                 + str(self.cut_point - self.play_step_frame)
                 + "th frame"
             )
-            self.redirectPrint(
-                "[LOADING] The last record is deleting. Please loading ......"
-            )
-            if self.frame.save_button.cget("state") == "normal":
+            if (
+                self.frame.save_button.cget("state") == "normal"
+                and self.frame.mode_switch.get() == 0
+            ):
+                self.redirectPrint(
+                    "[LOADING] The last record is deleting. Please loading ......"
+                )
                 self.delete_record(self.csv_path, 1)
                 self.redirectPrint(
                     "You have deleted the last record. Now you can re-record this clip label."
                 )
-            if self.frame.save_button.cget("state") == "disabled":
+            if (
+                self.frame.save_button.cget("state") == "disabled"
+                and self.frame.mode_switch.get() == 0
+            ):
+                self.redirectPrint(
+                    "[LOADING] The last record is deleting. Please loading ......"
+                )
                 self.delete_record(self.csv_path, 2)
                 self.redirectPrint(
                     "You have deleted the last record. Now you can re-record this clip label."
@@ -163,7 +186,9 @@ class APP(tk.CTk):
                 self.redirectPrint(
                     "[WARNING] Because of you have added a new label, so this label will be deleted as well. You need to re-record it again."
                 )
-            self.set_bind("E")
+            if self.frame.mode_switch.get() == 0:
+                self.set_bind("E")
+                self.set_unbind("n")
             self.move_cursor(-self.play_step_frame)
             self.update_frame_pos()
             self.frame.video_info.update_info()
@@ -177,14 +202,21 @@ class APP(tk.CTk):
         打开视频文件
         """
         self.file_path = filedialog.askopenfilename()
+        logging.info(self.file_path)
+        logging.info(self.last_open)
+        logging.info(self.last_open.rstrip() == self.file_path)
         os.makedirs(".cache", exist_ok=True)
-        with open(".cache/last_open.txt", "w", newline="") as f:
-            f.write(self.file_path)
+        if str(self.last_open.rstrip()) != str(self.file_path):
+            with open(".cache/last_open.txt", "a+") as f:
+                f.write(self.file_path)
+                f.write("\n")
         self.f_path, self.file_name = os.path.split(self.file_path)
         self.redirectPrint(
             "You have opened the video! The video name is:\n" + self.file_name
         )
-        self.file_count += 1
+        with open(".cache/last_open.txt", "r") as f:
+            count = len(f.readlines())
+        self.file_count = count
         self.frame.file_count_num.configure(text=str(self.file_count))
         logging.info("Opening video file: " + self.file_path)
         self.set_bind(["E", "n"])
@@ -241,7 +273,8 @@ class APP(tk.CTk):
         self.redirectPrint("This video clip has saved.")
         self.frame.save_button.configure(state="disabled")
         self.set_unbind("E")
-        self.label_info()
+        self.set_bind("n")
+        self.write_label()
         if self.frame.check.get():
             option_num: int = self.frame.emo_option.num.get()
             emotion = OPTION[option_num]
@@ -313,7 +346,7 @@ class APP(tk.CTk):
                 csv.writer(f).writerow(header)
                 # csv.writer(f).writerow(data_init)
 
-    def label_info(self):
+    def write_label(self):
         """
         读取并写入用户设置的标签
         """
@@ -359,8 +392,9 @@ class APP(tk.CTk):
         """
         重置已打开文件数
         """
-        self.file_count = 0
-        self.frame.file_count_num.configure(text=str(self.file_count))
+        with open(".cache/last_open.txt", "w") as f:
+            f.write("")
+        self.frame.file_count_num.configure(text=0)
 
     def set_bind(self, keys: list[str]):
         """
@@ -408,4 +442,14 @@ class APP(tk.CTk):
         """
         df = pandas.read_csv(path)
         df.drop(index=df.tail(num).index, axis=0, inplace=True)
-        df.to_csv(path)
+        df.to_csv(path, index=None)
+
+    def mode_switch(self):
+        if self.frame.mode_switch.get() == 1:
+            # in preview mode
+            self.set_unbind("E")
+            self.redirectPrint("[PREVIEW MODE] You have entered the preview mode!")
+        if self.frame.mode_switch.get() == 0:
+            # in work space
+            self.set_bind("E")
+            self.redirectPrint("[WORK MODE] You have entered the work mode!")

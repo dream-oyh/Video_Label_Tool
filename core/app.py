@@ -37,13 +37,11 @@ class APP(tk.CTk):
         self.image: tk.CTkImage
         self.frame.file_count_num.configure(text=str(self.file_count))
         if not os.path.exists(".cache"):
-            os.makedirs(".cache", exist_ok=True)
-            with open(".cache/last_open.txt", "w", newline="") as f:
-                f.write("")
+            os.makedirs(".cache/last_open.txt", exist_ok=True)
         with open(".cache/last_open.txt", "r") as f:
-            try:
-                self.last_open = f.readlines()[-1]
-            except:
+            self.last_open = f.readlines()[-1]
+            logging.info(self.last_open)
+            if self.last_open is None:
                 self.frame.video_path_label.configure(text="请选择你的第一个视频文件")
                 self.last_open = "0"
             else:
@@ -333,7 +331,7 @@ class APP(tk.CTk):
             "start frame",
             "end frame",
             "emotion",
-            "potency",
+            "valence",
             "arousal",
             "fatigue",
         ]
@@ -344,6 +342,15 @@ class APP(tk.CTk):
             with open(self.csv_path, mode="w", newline="") as f:
                 csv.writer(f).writerow(header)
                 # csv.writer(f).writerow(data_init)
+        df = pandas.read_csv(self.csv_path)
+        k = (df.tail(1).iloc[0, 1]) % (self.frame_count)
+        self.frame.last_frame.configure(
+            text="您上次已记录至第"
+            + str(k)
+            + "帧，若要继续记录，请在预览模式中将起始帧调至第"
+            + str(k)
+            + "帧"
+        )
 
     def write_label(self):
         """
@@ -361,13 +368,13 @@ class APP(tk.CTk):
         try:
             df.tail(1).iloc[0, 0]
         except:
-            last_end_frame = 0
+            self.last_end_frame = 0
         else:
-            last_end_frame = df.tail(1).iloc[0, 1]
+            self.last_end_frame = df.tail(1).iloc[0, 1]
 
         label_data = [
-            last_end_frame,
-            last_end_frame + self.play_step_frame,
+            self.last_end_frame,
+            self.last_end_frame + self.play_step_frame,
             self.emo_label,
             self.potency,
             self.arousal,

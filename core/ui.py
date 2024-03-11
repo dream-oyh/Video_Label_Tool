@@ -9,7 +9,7 @@ from component.MyText import TextRedirector
 
 # from component.InfoFrame import InfoFrame
 from component.OptionGroup import OptionGroup
-from utils import FA_OPTION, OPTION, VIDEOSIZE
+from utils import FA_OPTION, OPTION, VIDEOSIZE, SLIDER_TEXT
 
 
 class MyFrame(tk.CTkFrame):
@@ -27,6 +27,12 @@ class MyFrame(tk.CTkFrame):
             master=self, text="", width=1000, height=1, anchor="w"
         )
         self.video_path_label.place(x=170, y=8)
+
+        # last record frame
+        self.last_frame = tk.CTkLabel(
+            master=self, text="", width=1000, height=1, anchor="w"
+        )
+        self.last_frame.place(x=650, y=8)
 
         # 视频显示界面
         self.video_frames = tk.CTkLabel(
@@ -105,10 +111,9 @@ class MyFrame(tk.CTkFrame):
         self.emo_option.place(x=800, y=50)
 
         # potency and arousal option
-        text = {"potency": 5, "arousal": 2}
         self.num_slider = [
             MySlider(master=self, text=key, default=item, state="disabled")
-            for key, item in text.items()
+            for key, item in SLIDER_TEXT.items()
         ]
         self.num_slider[0].place(x=800, y=200)
         self.num_slider[1].place(x=800, y=280)
